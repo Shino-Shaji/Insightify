@@ -8,3 +8,4 @@ pandas==2.2.3
 beautifulsoup4==4.12.3
 seaborn==0.13.2
 gunicorn
+whitenoise
