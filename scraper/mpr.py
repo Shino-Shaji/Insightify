@@ -6,8 +6,12 @@ from urllib.parse import urlparse,unquote
 import google.generativeai as genai
 import json
 import markdown2
+from pathlib import Path
 
-with open('/home/shino-shaji/Downloads/Major-Project/revscr/scraper/api_keys.json') as f:
+BASE_DIR = Path(__file__).parent
+api_keys_path = BASE_DIR / "api_keys.json"
+
+with open(api_keys_path) as f:
     api_keys = json.load(f)
 
 
