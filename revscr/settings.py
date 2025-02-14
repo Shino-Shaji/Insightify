@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-^#hr6^)ctn^@w1g$9nfu*f2l)-q-*#g7+$1nz)b@-2smxm@d2i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.localhost', '127.0.0.1','Insightify.onrender.com']
+ALLOWED_HOSTS = ['.localhost', '127.0.0.1','insightify-qd0y.onrender.com']
 # ALLOWED_HOSTS = ['192.168.1.2']
 
 
