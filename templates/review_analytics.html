@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Review Analytics</title>
+    {% load static %}
+    <link rel="stylesheet" href="{%static '/css/review_analytics.css'%}"/>
+  
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      
+    </style>
+  </head>
+  <body class="yeo-slogan">
+    <h1>Insightify Score: <span id="scoreValue">{{ sentiment_score|floatformat:"2"}}</span></h1>
+    <p style="text-align: center;">{{ recommendation }}</p>
+    <div id="gemini-response-section" >
+      <h3 style="text-align: center;">Product Specifications</h3>
+      <p>{{ gemini_response |safe}}</p>
+  </div>
+    <div class="card-container">
+      
+      <div class="card">
+        <h2>Star Rating Distribution</h2>
+        <div class="chart-container">
+          <canvas id="starRatingChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Positive vs Negative Reviews</h2>
+        <div class="chart-container">
+          <canvas id="positiveNegativeReviewsChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>Most Busy Month of Year</h2>
+        <div class="chart-container">
+          <canvas id="mostBusyMonthChart"></canvas>
+        </div>
+      </div>
+      
+      
+    <div class="card">
+      <h2>Number of Reviews Per Date</h2>
+      <div class="chart-container">
+          <canvas id="noOfReviewsPerDateChart"></canvas>
+      </div>
+  </div>
+  
+  <div class="card" id="sentimentData" data-counts="{{ sentiment_values }}">
+      <h2>Sentiment Count</h2>
+      <div class="chart-container">
+        <canvas id="sentimentAnalysisChart"></canvas>
+      </div>
+  </div>
+
+  <div class="card">
+    <h2>Monthly Average Rating Trend</h2>
+    <div class="chart-container">
+      <canvas id="monthlyRatingTrendChart"></canvas>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Top Positive Reviews</h2>
+    <div class="chart-container">
+      <canvas id="topPositiveReviewsChart"></canvas>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Top Negative Reviews</h2>
+    <div class="chart-container">
+      <canvas id="topNegativeReviewsChart"></canvas>
+    </div>
+  </div>
+  
+</div>
+<script>
+// Get the sentiment score value from the template
+const sentimentScore = {{ sentiment_score}};
+const scoreDisplay = document.getElementById('scoreValue');
+
+// Set the initial value of the score to zero
+let currentScore = 0;
+
+// Function to animate the score incrementally
+function animateScore() {
+    // Increment the score gradually until it reaches the sentiment score value
+    const interval = setInterval(() => {
+        scoreDisplay.textContent = currentScore;
+        if (currentScore >= sentimentScore) {
+            clearInterval(interval); // Stop the animation when the score reaches the sentiment score value
+        } else {
+            currentScore++; // Increment the score
+        }
+    }, 22.5); // Adjust the interval to control the animation speed
+}
+
+// Start the animation when the window loads
+window.onload = animateScore;
+          document.addEventListener("DOMContentLoaded", function () {
+            // Star Rating Distribution Chart
+            var ctx1 = document.getElementById("starRatingChart").getContext("2d");
+        var starRatingChart = new Chart(ctx1, {
+          type: "bar",
+          data: {
+            labels: JSON.parse("{{ star_ratings|escapejs }}"),
+            datasets: [
+              {
+                label: "Star Ratings",
+                data: JSON.parse("{{ star_counts|escapejs }}"),
+                backgroundColor: "rgba(1321 131 1231 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1,
+                pointBorderColor: "#fff",
+              },
+            ],
+          },
+          options: {
+            scales: {
+              x: {
+                grid: {
+                  display: false, // Remove gridlines on x-axis
+                },
+                ticks: {
+                  color: "white", // Set x-axis tick color to white
+                },
+              },
+              y: {
+                beginAtZero: true,
+                grid: {
+                  display: false, // Remove gridlines on y-axis
+                },
+                ticks: {
+                  color: "white", // Set y-axis tick color to white
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: "rgba(54, 162, 235, 1)", // Set legend color to white
+                },
+              },
+            },
+          },
+        });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        var ctx3 = document
+          .getElementById("mostBusyMonthChart")
+          .getContext("2d");
+        var mostBusyMonthChart = new Chart(ctx3, {
+          type: "line",
+          data: {
+            labels: JSON.parse("{{ most_busy_month_labels|escapejs }}"),
+            datasets: [
+              {
+                label: "Frequency",
+                data: JSON.parse("{{ most_busy_month_values|escapejs }}"),
+                backgroundColor: "#944dff",
+                borderColor: "#944dff",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  color: "white",
+                },
+              },
+              y: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  color: "white",
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: "white",
+                },
+              },
+            },
+          },
+        });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        var ctx = document
+          .getElementById("noOfReviewsPerDateChart")
+          .getContext("2d");
+        var reviewDates = JSON.parse("{{ review_dates|escapejs }}");
+        var reviewCounts = JSON.parse("{{ review_counts|escapejs }}");
+
+        var reviewsPerDateChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: reviewDates,
+            datasets: [
+              {
+                label: "Number of Reviews",
+                data: reviewCounts,
+                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1,
+                pointBackgroundColor: "rgba(75, 192, 192, 1)",
+                pointBorderColor: "#fff",
+              },
+            ],
+          },
+          options: {
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  color: "white",
+                },
+              },
+              y: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  color: "white",
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: "white",
+                },
+              },
+            },
+          },
+        });
+      });
+      document.addEventListener("DOMContentLoaded", function () {
+        // Sentiment Analysis Chart
+        var ctx = document
+          .getElementById("sentimentAnalysisChart")
+          .getContext("2d");
+
+        // Retrieve sentiment data from the HTML element
+        var sentimentData = document.getElementById("sentimentData");
+        var sentimentCounts = JSON.parse(sentimentData.dataset.counts);
+
+        var sentimentAnalysisChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["Positive", "Neutral", "Negative"],
+            datasets: [
+              {
+                label: "Sentiment",
+                data: sentimentCounts,
+                backgroundColor: ["#0fe258", // Positive sentiment color
+                  "#fbf400", // Neutral sentiment color
+                  "#F44336", // Negative sentiment color
+                ],
+                borderColor: [
+                  "#84cc16", // Positive sentiment color
+                  "#facc15", // Neutral sentiment color
+                  "#b91c1c", // Negative sentiment color
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              x: {
+                grid: {
+                  display: false, // Remove gridlines on x-axis
+                },
+                ticks: {
+                    color: "white", // Set x-axis tick color to white
+                },
+              },
+              y: {
+                beginAtZero: true,
+                grid: {
+                  display: false, // Remove gridlines on y-axis
+                },
+                ticks: {
+                  color: "white", // Set y-axis tick color to white
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                  labels: {
+                      color: "white", // Set legend color to white
+                    },
+                },
+            },
+        },
+    });
+});
+document.addEventListener("DOMContentLoaded", function () {
+    // Monthly Average Rating Trend Chart
+var ctx6 = document
+  .getElementById("monthlyRatingTrendChart")
+  .getContext("2d");
+var monthlyRatingTrendChart = new Chart(ctx6, {
+  type: "line",
+  data: {
+    labels: JSON.parse("{{ monthly_avg_rating_labels|escapejs }}"),
+    datasets: [
+      {
+        label: "Monthly Average Rating",
+        data: JSON.parse("{{ monthly_avg_rating_values|escapejs }}"),
+        backgroundColor: "rgba(255, 159, 64, 0.2)",
+        borderColor: "rgba(255, 159, 64, 1)",
+        borderWidth: 1,
+        pointRadius: 5,
+        pointBackgroundColor: "rgba(255, 159, 64, 1)",
+        pointBorderColor: "#fff",
+        pointHoverRadius: 8,
+        pointHoverBackgroundColor: "#fff",
+        pointHoverBorderColor: "rgba(255, 159, 64, 1)",
+      },
+    ],
+  },
+  options: {
+    scales: {
+      x: {
+        grid: {
+          display: false, // Remove gridlines on x-axis
+        },
+        ticks: {
+          color: "white", // Set x-axis tick color to white
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          display: false, // Remove gridlines on y-axis
+        },
+        ticks: {
+          color: "white", // Set y-axis tick color to white
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        labels: {
+          color: "white", // Set legend color to white
+        },
+      },
+    },
+  },
+});
+});
+var ctx8 = document.getElementById("topNegativeReviewsChart").getContext("2d");
+        var topNegativeReviewsChart = new Chart(ctx8, {
+            type: "bar",
+            data: {
+                labels: JSON.parse("{{ top_negative_reviews_labels|escapejs }}"),
+                datasets: [{
+                    label: "Top Negative Reviews",
+                    data: JSON.parse("{{ top_negative_reviews_values|escapejs }}"),
+                    backgroundColor: "rgba(300,10,20, 0.3)",
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderWidth: 1,
+                }],
+            },
+            options: {
+                scales: {
+                    x: {
+                        grid: {
+                            display: false, // Remove gridlines on x-axis
+                        },
+                        ticks: {
+                            color: "white", // Set x-axis tick color to black
+                        },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false, // Remove gridlines on y-axis
+                        },
+                        ticks: {
+                            color: "white", // Set y-axis tick color to white
+                        },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "white", // Set legend color to white
+                        },
+                    },
+                },
+            },
+        });
+var ctx8 = document.getElementById("topPositiveReviewsChart").getContext("2d");
+        var topPositiveReviewsChart = new Chart(ctx8, {
+            type: "bar",
+            data: {
+                labels: JSON.parse("{{ top_positive_reviews_labels|escapejs }}"),
+                datasets: [{
+                    label: "Top Positive Reviews",
+                    data: JSON.parse("{{ top_positive_reviews_values|escapejs }}"),
+                    backgroundColor: "rgba(20, 450, 60, 0.4)", // Green color
+                    borderColor: "rgba(75, 192, 192, 1)", 
+                    borderWidth: 1,
+                }],
+            },
+            options: {
+                scales: {
+                    x: {
+                        grid: {
+                            display: false, // Remove gridlines on x-axis
+                        },
+                        ticks: {
+                            color: "white", // Set x-axis tick color to white
+                        },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false, // Remove gridlines on y-axis
+                        },
+                        ticks: {
+                            color: "white", // Set y-axis tick color to white
+                        },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "white", // Set legend color to white
+                        },
+                    },
+                },
+            },
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+    // Positive vs Negative Reviews Pie Chart
+    var ctx4 = document.getElementById("positiveNegativeReviewsChart").getContext("2d");
+    var positiveNegativeReviewsChart = new Chart(ctx4, {
+        type: "pie",
+        data: {
+            labels: ["Positive","Neutral", "Negative"],
+            datasets: [{
+                data: JSON.parse("{{ sentiment_values|escapejs }}"),
+                backgroundColor: ["#4ce950", "#fbf400", "#F44336"], // Green for positive, Red for negative
+                borderColor: "#ffffff",
+                borderWidth: 2,
+                hoverBackgroundColor: ["#66BB6A", "#EF5350"],
+                hoverBorderColor: "#ffffff",
+                hoverBorderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Maintain the aspect ratio
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        color: "white",
+                        font: {
+                            size: 14,
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            var label = tooltipItem.label || '';
+                            var value = tooltipItem.raw || 0;
+                            var total = tooltipItem.dataset.data.reduce((a, b) => a + b, 0);
+                            var percentage = ((value / total) * 100).toFixed(2);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    },
+                    backgroundColor: "rgba(0,0,0,0.7)",
+                    titleFont: {
+                        size: 16
+                    },
+                    bodyFont: {
+                        size: 14
+                    },
+                    footerFont: {
+                        size: 12
+                    },
+                    displayColors: false
+                }
+            }
+        }
+    });
+});
+    </script>
+  </body>
+</html>

@@ -1,0 +1,67 @@
+body {
+    background-color: white;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+h1,
+h2 {
+    color: white;
+    text-align: center;
+}
+
+.chart-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+#gemini-response-section {
+    margin: 0 auto; 
+    max-width: 800px; 
+    padding: 20px; 
+    border: 1px solid #ddd;
+    background-color: #1d5670; 
+    color: white; 
+    font-family: Arial, sans-serif; 
+    margin-top: 40px; 
+    flex-basis: calc(46% - 5px);
+    margin-bottom: 40px;
+    border: 1px solid #ddd;
+    border-radius: 9px;
+    overflow:hidden;
+}
+
+canvas {
+    background-color: rgba(77, 78, 83, 0.999);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.card-container {
+    display: flex;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-wrap: wrap;
+    justify-content: space-between
+}
+
+.card {
+    flex-basis: calc(46% - 5px);
+    margin-bottom: 40px;
+    border: 1px solid #ddd;
+    border-radius: 9px;
+    overflow:hidden;
+    padding: 20px;
+}
+
+.card img {
+    width: 100%;
+    height: auto;
+}
+
+.yeo-slogan {
+    background: #0a007e center;
+    background-size: auto;
+    padding-bottom: 3rem;
+    background-image: -webkit-linear-gradient(134deg, #00A87E 0%, #0C0091 100%);
+    background-image: -o-linear-gradient(134deg, #00A87E 0%, #0C0091 100%);
+    background-image: linear-gradient(224deg, #00A87E 0%, #0C0091 100%);}
